@@ -20,20 +20,14 @@ jobs:
       - name: Clone godot-cpp
         run: git clone --depth 1 --branch 4.4 https://github.com/godotengine/godot-cpp.git
 
-      - name: Setup Android NDK
-        id: ndk
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r23c
+      - name: Install Android NDK 23.2.8568313
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;23.2.8568313"
 
       - name: Build debug
-        env:
-          ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
         run: scons platform=android arch=arm64 target=template_debug
 
       - name: Build release
-        env:
-          ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
         run: scons platform=android arch=arm64 target=template_release
 
       - name: Upload result
