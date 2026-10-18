@@ -1,0 +1,43 @@
+name: Build RMVKH Android
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install SCons
+        run: pip install scons
+
+      - name: Clone godot-cpp
+        run: git clone --depth 1 --branch 4.4 https://github.com/godotengine/godot-cpp.git
+
+      - name: Setup Android NDK
+        id: ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r23c
+
+      - name: Build debug
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
+        run: scons platform=android arch=arm64 target=template_debug
+
+      - name: Build release
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
+        run: scons platform=android arch=arm64 target=template_release
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: rmvkh-android
+          path: bin/
